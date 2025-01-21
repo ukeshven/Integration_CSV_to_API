@@ -1,0 +1,46 @@
+json_list=[]
+
+
+for index, row in df1.iloc[0:].iterrows():
+    request_id = str(uuid.uuid4())
+    user_id='user_'+str(uuid.uuid4())
+    if row["Gender"]=='Male':
+        df1["Title"]='Mr.'
+    elif row["Gender"]=='Female':
+        df1["Title"]='Ms.'
+    if row["Email"]=='nan' or type(row["Email"])==float:
+        if row["Last Name"]=='nan' or type(row["Last Name"])==float:
+            row["Email"]=row["First Name"]+'@happay.in'
+        elif row["First Name"]=='nan' or type(row["First Name"])==float:
+            row["Email"]=row["Last Name"]+'@happay.in'
+        else:
+            row["Email"]=row["First Name"]+'.'+str(row["Last Name"])+'@happay.in'
+
+    json_obj = {
+            "requestId": request_id,
+            "userId": user_id,
+            "firstName": row["First Name"] ,
+            "lastName": row["Last Name"],
+            "emailId": row["Email"],
+            "mobileNo": row["Mobile"],
+            "mobile_extension": "+91",
+            "dob": row["Date of Birth"],
+            "title": row["Title"],
+            "gender": row["Gender"],
+            "extra_fields": {
+                "cost_centre": row["Cost Centre"],
+                "cost_category": row["Cost Category"],
+                "designation": row["Designation"] ,
+                "department": row["Department"]
+            }
+        }
+    json_list.append(json_obj)
+    try:
+        response = requests.post(url, headers=headers, data=json.dumps(json_obj))
+        if response.status_code == 200:
+            response_data = response.json()
+            print(f"userId in Happay system: {response_data.get('userId')}")
+        else:
+            print(f"Failed to add user. Status Code: {response.status_code}")
+    except Exception as e:
+        print(f"Error API call: {user_id}:{e}")
